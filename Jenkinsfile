@@ -1,14 +1,29 @@
 pipeline {
     agent any
+
+    triggers {
+        // Trigger on changes to the main branch
+        pollSCM('* * * * *')
+    }
     stages {
-        stage('Build project') {
+        stage('Checkout') {
             steps {
-                bat 'dotnet build'
+                checkout scm
             }
         }
-        stage('Execute tests') {
+        stage('Restore dependencies') {
             steps {
-                bat 'dotnet test'
+                bat 'dotnet restore'
+            }
+        }
+        stage('Build') {
+            steps {
+                bat 'dotnet build --no-restore'
+            }
+        }
+        stage('Run UI tests') {
+            steps {
+                bat 'dotnet test --no-build --verbosity normal'
             }
         }
     }
